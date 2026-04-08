@@ -14,7 +14,11 @@ Import-Module -Name Terminal-Icons
 #Set-Theme ParadoxGlucose
 #Set-PoshPrompt -theme "D:\Dropbox\poshv3.json"
 
-oh-my-posh init pwsh --config "$env:OneDriveConsumer\Documents\oh-my-posh\mytheme.json" | Invoke-Expression
+if ($env:TERM_PROGRAM -eq 'vscode') {
+    oh-my-posh init pwsh --config "$env:OneDriveConsumer\Documents\oh-my-posh\sh.json" | Invoke-Expression
+} else {
+    oh-my-posh init pwsh --config "$env:OneDriveConsumer\Documents\oh-my-posh\mytheme.json" | Invoke-Expression
+}
 
 
 Register-ArgumentCompleter -Native -CommandName winget -ScriptBlock {

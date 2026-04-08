@@ -8,7 +8,7 @@ if ($host.Name -eq 'ConsoleHost')
     Import-Module PSReadLine
 }
 #Import-Module PSColors
-#Import-Module -Name Terminal-Icons
+Import-Module -Name Terminal-Icons
 #set-alias desktop "Desktop.ps1"
 #Set-Theme ParadoxGlucose
 #Set-PoshPrompt -theme "D:\Dropbox\poshv3.json"
