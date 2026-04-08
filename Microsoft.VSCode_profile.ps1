@@ -8,12 +8,12 @@ if ($host.Name -eq 'ConsoleHost')
     Import-Module PSReadLine
 }
 #Import-Module PSColors
-Import-Module -Name Terminal-Icons
+#Import-Module -Name Terminal-Icons
 #set-alias desktop "Desktop.ps1"
 #Set-Theme ParadoxGlucose
 #Set-PoshPrompt -theme "D:\Dropbox\poshv3.json"
 
-oh-my-posh init pwsh --config "$env:OneDriveConsumer\Documents\oh-my-posh\mytheme.json" | Invoke-Expression
+oh-my-posh init pwsh --config "$PSScriptRoot\oh-my-posh\sh.json" | Invoke-Expression
 
 
 Register-ArgumentCompleter -Native -CommandName winget -ScriptBlock {
@@ -671,7 +671,7 @@ Set-PSReadLineKeyHandler -Key Alt+a `
 
 
 Set-PSReadLineOption -PredictionSource History
-Set-PSReadLineOption -PredictionViewStyle ListView
+Set-PSReadLineOption -PredictionViewStyle InlineView
 Set-PSReadLineOption -EditMode Windows
 
 
