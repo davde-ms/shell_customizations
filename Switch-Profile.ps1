@@ -122,7 +122,8 @@ function Set-ProfileLink {
         Write-Warning "Symlink creation failed ($($_.Exception.Message)). Falling back to copy."
         Copy-Item -LiteralPath $SourcePath -Destination $LivePath -Force
         Write-Host "  copied  $SourcePath  ->  $LivePath" -ForegroundColor Yellow
-        Write-Host "  (Edits to the repo file will NOT propagate until you re-run this script.)" -ForegroundColor DarkYellow
+        Write-Host "  Tip: enable Developer Mode (Settings -> For developers) to allow non-admin symlinks," -ForegroundColor DarkYellow
+        Write-Host "       then re-run this script. Until then, edits to the repo file will NOT propagate." -ForegroundColor DarkYellow
     }
 }
 
@@ -130,6 +131,14 @@ if ($PSCmdlet.ParameterSetName -eq 'Status' -or -not $Variant) {
     Show-Status
     return
 }
+
+# Persist the repo root for both shells (process + user scope) so the profiles
+# can locate sibling files (themes, the main profile when the wrapper is copied
+# instead of symlinked, etc.) regardless of how they were installed.
+[Environment]::SetEnvironmentVariable('SHELL_CUSTOMIZATIONS_ROOT', $repoRoot, 'User')
+$env:SHELL_CUSTOMIZATIONS_ROOT = $repoRoot
+Write-Host ''
+Write-Host "Set user env var SHELL_CUSTOMIZATIONS_ROOT = $repoRoot" -ForegroundColor DarkGray
 
 Write-Host ''
 Write-Host "Switching to: $Variant" -ForegroundColor Magenta

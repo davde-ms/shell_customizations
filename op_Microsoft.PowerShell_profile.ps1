@@ -14,16 +14,40 @@ using namespace System.Management.Automation.Language
 #   5. Theme can be overridden by the VS Code wrapper via $env:OMP_THEME.
 # ---------------------------------------------------------------------------
 
+# Resolve the repo root. Three strategies, in order:
+#   1. $env:SHELL_CUSTOMIZATIONS_ROOT (set by Switch-Profile.ps1; works for
+#      both symlinked and copied installs).
+#   2. The symlink target of $PSCommandPath (works when the profile is a
+#      symlink and the env var is not set).
+#   3. $PSScriptRoot (works when the profile is dot-sourced from the repo).
+$repoRoot = $null
+if ($env:SHELL_CUSTOMIZATIONS_ROOT -and (Test-Path -LiteralPath $env:SHELL_CUSTOMIZATIONS_ROOT)) {
+    $repoRoot = $env:SHELL_CUSTOMIZATIONS_ROOT
+} else {
+    try {
+        $self = Get-Item -LiteralPath $PSCommandPath -Force -ErrorAction Stop
+        if ($self.LinkType -eq 'SymbolicLink' -and $self.Target) {
+            $target = if ([System.IO.Path]::IsPathRooted($self.Target)) {
+                $self.Target
+            } else {
+                Join-Path $PSScriptRoot $self.Target
+            }
+            $repoRoot = Split-Path -Parent (Resolve-Path -LiteralPath $target).Path
+        }
+    } catch {}
+}
+if (-not $repoRoot) { $repoRoot = $PSScriptRoot }
+
 # region: Oh My Posh (cached)
 
 $ompTheme = if ($env:OMP_THEME) {
     $env:OMP_THEME
 } elseif ($env:TERM_PROGRAM -eq 'vscode') {
-    "$PSScriptRoot\oh-my-posh\sh.json"
+    Join-Path $repoRoot 'oh-my-posh\sh.json'
 } else {
     # Existing layout used $env:OneDriveConsumer\Documents\oh-my-posh\mytheme.json.
     # Prefer the repo-local theme first, fall back to the OneDrive copy.
-    $local = "$PSScriptRoot\oh-my-posh\davde-theme.json"
+    $local = Join-Path $repoRoot 'oh-my-posh\davde-theme.json'
     if (Test-Path $local) { $local } else { "$env:OneDriveConsumer\Documents\oh-my-posh\mytheme.json" }
 }
 
