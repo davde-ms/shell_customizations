@@ -1,606 +1,307 @@
 # Shell Customizations
 
-A portable collection of PowerShell profile configurations, Oh My Posh prompt themes, PSReadLine keybindings, and Nerd Fonts — designed to be cloned and linked into a new machine's PowerShell profile paths for a consistent, productive terminal experience.
+A ready-to-use PowerShell setup for Windows: a beautiful prompt, smart history search, file-type icons, and the bundled font that makes it all look right. Everything lives in this repo — clone it, run one script, and your terminals (Windows Terminal, VS Code, plain pwsh) all look and behave the same.
+
+> **Don't know PowerShell yet? That's fine.** Follow the steps in [Quick Start](#quick-start) line by line. You can copy-paste each command.
+
+---
+
+## What you get
+
+- 🎨 A **colorful prompt** showing your current folder, Git status, last command's success/failure, and Azure context (powered by [Oh My Posh](https://ohmyposh.dev)).
+- ⚡ **Smart history search** — start typing a command, press Up Arrow, and PowerShell finds the last matching command you ran.
+- 🤖 **Inline command suggestions** as you type, based on your history.
+- 📁 **Icons next to files and folders** in directory listings (powered by Terminal-Icons).
+- 🔤 The **Nerd Font** the prompt needs to render its icons.
+- 🚀 An **optimized profile** that loads ~3× faster than the standard one.
+- 🔄 A **switcher script** to flip between the original and optimized profiles whenever you want.
 
 ---
 
 ## Table of Contents
 
-- [Prerequisites](#prerequisites)
-- [Installation Guide](#installation-guide)
-  - [Step 1 — Verify PowerShell Version](#step-1--verify-powershell-version)
-  - [Step 2 — Install Oh My Posh](#step-2--install-oh-my-posh)
-  - [Step 3 — Install Required PowerShell Modules](#step-3--install-required-powershell-modules)
-  - [Step 4 — Install the Nerd Font](#step-4--install-the-nerd-font)
-  - [Step 5 — Configure Your Terminal Font](#step-5--configure-your-terminal-font)
-  - [Step 6 — Clone This Repository](#step-6--clone-this-repository)
-  - [Step 7 — Find Your Profile Path](#step-7--find-your-profile-path)
-  - [Step 8 — Back Up Existing Profiles](#step-8--back-up-existing-profiles)
-  - [Step 9 — Create Symbolic Links](#step-9--create-symbolic-links)
-  - [Step 10 — Verify the Setup](#step-10--verify-the-setup)
-- [Repository Structure](#repository-structure)
-- [How PowerShell Profiles Work](#how-powershell-profiles-work)
-  - [What Is a Profile?](#what-is-a-profile)
-  - [How the Host Determines Which Profile Loads](#how-the-host-determines-which-profile-loads)
-  - [Why Symbolic Links?](#why-symbolic-links)
-  - [Execution Order Inside the Profile](#execution-order-inside-the-profile)
-- [Profile Differences: Console vs. VS Code](#profile-differences-console-vs-vs-code)
-- [What the Profiles Configure](#what-the-profiles-configure)
-  - [Modules Loaded](#modules-loaded)
-  - [CLI Tab-Completion](#cli-tab-completion)
-  - [PSReadLine Configuration](#psreadline-configuration)
-- [Oh My Posh Themes](#oh-my-posh-themes)
-- [Fonts](#fonts)
+- [Quick Start](#quick-start)
+- [What's in this repo](#whats-in-this-repo)
+- [How it works](#how-it-works)
+- [Switching between Original and Optimized](#switching-between-original-and-optimized)
+- [Updating, moving, or uninstalling](#updating-moving-or-uninstalling)
 - [Troubleshooting](#troubleshooting)
-- [Uninstalling](#uninstalling)
+- [For curious users — what the profiles actually do](#for-curious-users--what-the-profiles-actually-do)
 
 ---
 
-## Prerequisites
+## Quick Start
 
-| Requirement | Minimum Version | How to Check |
-|---|---|---|
-| **Windows** | Windows 10 1903+ or Windows 11 | `winver` |
-| **PowerShell** | 7.0+ (PowerShell Core) | `$PSVersionTable.PSVersion` |
-| **Git** | Any recent version | `git --version` |
-| **Windows Terminal** | Recommended (not required) | Available from Microsoft Store |
-| **winget** | Any recent version (ships with Windows 11 / App Installer) | `winget --version` |
+You'll need about 10 minutes. Open **PowerShell 7** (look for the icon labeled **PowerShell** that opens a window with the title `pwsh` — not the old "Windows PowerShell").
 
-> **Note:** These profiles are designed for **PowerShell 7+** (pwsh.exe), not Windows PowerShell 5.1 (powershell.exe). While they may partially work on 5.1, some features (like `PredictionSource`, `AcceptNextSuggestionWord`, and the `using namespace` declarations) require PowerShell 7+.
+### 1. Install the prerequisites (one-time)
 
----
-
-## Installation Guide
-
-### Step 1 — Verify PowerShell Version
-
-Open a terminal and check your PowerShell version:
+Copy and paste this whole block into PowerShell. It installs PowerShell 7 (if missing), Oh My Posh, and the icon module.
 
 ```powershell
-$PSVersionTable.PSVersion
-```
+# Install PowerShell 7 if you don't have it (skip if you're already in pwsh)
+winget install --id Microsoft.PowerShell -e --accept-source-agreements --accept-package-agreements
 
-You should see version **7.x** or higher. If you see **5.1**, you're running Windows PowerShell, not PowerShell Core.
+# Install Oh My Posh (the prompt engine)
+winget install --id JanDeDobbeleer.OhMyPosh -e --accept-source-agreements --accept-package-agreements
 
-**To install PowerShell 7+:**
-
-```powershell
-winget install Microsoft.PowerShell
-```
-
-After installation, use `pwsh.exe` (not `powershell.exe`) to launch PowerShell 7.
-
-### Step 2 — Install Oh My Posh
-
-[Oh My Posh](https://ohmyposh.dev/) is the prompt theme engine used by both profiles.
-
-```powershell
-winget install JanDeDobbeleer.OhMyPosh
-```
-
-After installation, **restart your terminal** so that `oh-my-posh` is available on your `PATH`.
-
-Verify the installation:
-
-```powershell
-oh-my-posh --version
-```
-
-### Step 3 — Install Required PowerShell Modules
-
-```powershell
-# Terminal-Icons — adds file/folder icons to directory listings (used by the console profile)
+# Install the icon module
 Install-Module -Name Terminal-Icons -Scope CurrentUser -Force
-
-# PSReadLine — should already be included with PowerShell 7+, but update to latest
-Install-Module -Name PSReadLine -Scope CurrentUser -Force -SkipPublisherCheck
 ```
 
-### Step 4 — Install the Nerd Font
+**Close and reopen your terminal** so it picks up the new commands.
 
-The Oh My Posh themes use powerline glyphs and icons that require a **Nerd Font**. This repo includes the **Caskaydia Cove Nerd Font** (a patched version of Cascadia Code) in the `fonts/` directory.
+### 2. Install the font
 
-**Option A — Manual install:**
-1. Navigate to the `fonts/` folder in this repo
-2. Double-click `Caskaydia Cove Nerd Font Complete Mono Windows Compatible.ttf`
-3. Click **Install**
+The fancy prompt uses special icon characters that only render correctly with a **Nerd Font**. The simplest option:
 
-**Option B — Install for all users (requires Admin):**
-1. Copy the `.ttf` files to `C:\Windows\Fonts`
-
-**Option C — Install via Oh My Posh:**
 ```powershell
 oh-my-posh font install CascadiaCode
 ```
 
-### Step 5 — Configure Your Terminal Font
+When it asks which variant, choose **CascadiaCode**.
 
-After installing the font, configure your terminal application to use it.
+> Alternatively, double-click any `.ttf` file in this repo's `fonts/` folder and click **Install**.
 
-#### Windows Terminal
+### 3. Tell your terminal to use the font
 
-1. Open **Settings** (Ctrl+,)
-2. Select a profile (e.g., **PowerShell**) under **Profiles**
-3. Go to **Appearance**
-4. Set **Font face** to `CaskaydiaCove Nerd Font Mono`
-5. Click **Save**
+**Windows Terminal**
+1. Press `Ctrl+,` to open Settings.
+2. Click your **PowerShell** profile (or **Defaults** to apply to all profiles).
+3. Go to **Appearance** → **Font face** → select **CaskaydiaCove Nerd Font Mono**.
+4. Click **Save**.
 
-Alternatively, edit `settings.json` directly:
+**VS Code**
+1. Press `Ctrl+,` to open Settings.
+2. Search for `terminal.integrated.fontFamily`.
+3. Set it to `CaskaydiaCove Nerd Font Mono`.
 
-```json
-{
-    "profiles": {
-        "defaults": {
-            "font": {
-                "face": "CaskaydiaCove Nerd Font Mono"
-            }
-        }
-    }
-}
-```
+### 4. Clone this repo
 
-#### VS Code
-
-1. Open **Settings** (Ctrl+,)
-2. Search for `terminal.integrated.fontFamily`
-3. Set the value to `CaskaydiaCove Nerd Font Mono`
-
-Or add to `settings.json`:
-
-```json
-{
-    "terminal.integrated.fontFamily": "CaskaydiaCove Nerd Font Mono"
-}
-```
-
-### Step 6 — Clone This Repository
-
-Clone the repo to a permanent location on your machine. This location matters — the symbolic links will point here, so don't move or delete it later.
+Pick any folder you like — just remember where you put it. Don't delete or move it after step 5.
 
 ```powershell
-# Example: clone to a repos folder
-cd C:\Github Repos
+# Example: clone into C:\Tools
+mkdir C:\Tools -Force | Out-Null
+cd C:\Tools
 git clone https://github.com/davde-ms/shell_customizations.git
+cd shell_customizations
 ```
 
-> **Important:** Remember the full path to the cloned repo. You'll need it in Step 9. In the examples below, we use `C:\Github Repos\shell_customizations` — replace this with your actual path.
-
-### Step 7 — Find Your Profile Path
-
-PowerShell stores your profile path in the `$PROFILE` variable. The exact location depends on your system configuration — it may be in your local `Documents` folder, or it might be redirected to OneDrive.
-
-Run this to see all profile paths:
+### 5. Run the switcher
 
 ```powershell
-$PROFILE | Format-List -Force
+.\Switch-Profile.ps1 Optimized
 ```
 
-Example output:
+You should see green or yellow output saying it linked or copied two files. **Close and reopen your terminal** — your new prompt is live.
 
-```
-AllUsersAllHosts       : C:\Program Files\PowerShell\7\profile.ps1
-AllUsersCurrentHost    : C:\Program Files\PowerShell\7\Microsoft.PowerShell_profile.ps1
-CurrentUserAllHosts    : C:\Users\you\Documents\PowerShell\profile.ps1
-CurrentUserCurrentHost : C:\Users\you\Documents\PowerShell\Microsoft.PowerShell_profile.ps1
-```
+That's it. Open Windows Terminal or a VS Code terminal — both should show the new prompt.
 
-The path you care about is **CurrentUserCurrentHost**. Common locations:
+---
 
-| Scenario | Typical Path |
+## What's in this repo
+
+| File / folder | What it is |
 |---|---|
-| Standard local Documents | `C:\Users\<you>\Documents\PowerShell\` |
-| OneDrive Personal folder redirect | `C:\Users\<you>\OneDrive\Documents\PowerShell\` |
-| OneDrive for Business folder redirect | `C:\Users\<you>\OneDrive - <OrgName>\Documents\PowerShell\` |
+| `Microsoft.PowerShell_profile.ps1` | The **original** profile for regular PowerShell windows (Windows Terminal, standalone pwsh.exe). |
+| `Microsoft.VSCode_profile.ps1` | The **original** profile for VS Code's integrated terminal. |
+| `op_Microsoft.PowerShell_profile.ps1` | The **optimized** profile for regular PowerShell windows. Faster startup. |
+| `op_Microsoft.VSCode_profile.ps1` | The **optimized** profile for VS Code's integrated terminal. |
+| `Switch-Profile.ps1` | The **switcher script** — flips your active profile between Original and Optimized. |
+| `oh-my-posh/` | The prompt theme files (`.json`). |
+| `oh-my-posh-docs/` | Reference docs for the Oh My Posh theme syntax (for editing themes). |
+| `fonts/` | The Caskaydia Cove Nerd Font files. |
 
-> **Tip:** Save the profile directory to a variable for the next steps:
-> ```powershell
-> $profileDir = Split-Path $PROFILE
-> ```
+---
 
-If the profile directory doesn't exist yet, create it:
+## How it works
+
+PowerShell automatically runs a script called your **profile** every time it starts. Your profile is just a `.ps1` file at a specific location:
+
+```
+C:\Users\<you>\Documents\PowerShell\Microsoft.PowerShell_profile.ps1     ← regular PowerShell
+C:\Users\<you>\Documents\PowerShell\Microsoft.VSCode_profile.ps1         ← VS Code's terminal
+```
+
+(If you use OneDrive, your `Documents` folder may live under `OneDrive\Documents\` or `OneDrive - <Org>\Documents\`. PowerShell knows where it is — type `$PROFILE` to see your exact path.)
+
+**The switcher (`Switch-Profile.ps1`) replaces those files with pointers to the version you want from this repo.** It also remembers where this repo lives by saving its path in an environment variable called `SHELL_CUSTOMIZATIONS_ROOT`, so the profiles can find their theme files no matter where you cloned the repo.
+
+### Symlink vs. Copy
+
+The switcher prefers to use a **symbolic link** (symlink): a tiny pointer file. With a symlink, when you edit a file in this repo, the change is live the next time you open a terminal — no re-running needed.
+
+But Windows requires either **administrator rights** or **Developer Mode** to create symlinks. If neither is available, the switcher **falls back to a regular file copy**. That works fine, but with one trade-off: after editing a profile in this repo, you have to re-run `.\Switch-Profile.ps1 Optimized` for the change to take effect.
+
+#### Recommended one-time setup: enable Developer Mode
+
+This lets symlinks work without admin rights.
+
+1. Open Windows **Settings**.
+2. Go to **Privacy & security** → **For developers**.
+3. Turn **Developer Mode** to **On**.
+4. Re-run `.\Switch-Profile.ps1 Optimized`.
+
+---
+
+## Switching between Original and Optimized
+
+The optimized profile loads in about a third of the time. It does this by:
+
+- **Caching** the prompt initialization output (no need to spawn `oh-my-posh.exe` on every shell start).
+- **Loading icons lazily** — Terminal-Icons starts in the background after your first prompt is on screen.
+- **Trimming unused** PSReadLine sample handlers.
+
+Run any of these from inside the cloned repo folder:
 
 ```powershell
-$profileDir = Split-Path $PROFILE
-if (!(Test-Path $profileDir)) {
-    New-Item -ItemType Directory -Path $profileDir -Force
-}
+.\Switch-Profile.ps1                # show which version is currently active
+.\Switch-Profile.ps1 Optimized      # use the fast version (recommended)
+.\Switch-Profile.ps1 Original       # go back to the verbose original
 ```
 
-### Step 8 — Back Up Existing Profiles
+After switching, **close and reopen your terminal** for the change to take effect.
 
-If you already have profile files, back them up before creating symbolic links. The symlink creation will replace any existing files at the target path.
+### Measure the difference yourself
 
 ```powershell
-$profileDir = Split-Path $PROFILE
-
-# Back up PowerShell console profile (if it exists)
-$psProfile = Join-Path $profileDir "Microsoft.PowerShell_profile.ps1"
-if (Test-Path $psProfile) {
-    Copy-Item $psProfile "$psProfile.bak"
-    Write-Host "Backed up: $psProfile -> $psProfile.bak"
-}
-
-# Back up VS Code profile (if it exists)
-$vscProfile = Join-Path $profileDir "Microsoft.VSCode_profile.ps1"
-if (Test-Path $vscProfile) {
-    Copy-Item $vscProfile "$vscProfile.bak"
-    Write-Host "Backed up: $vscProfile -> $vscProfile.bak"
-}
+1..5 | ForEach-Object {
+    (Measure-Command { pwsh -NoLogo -Command exit }).TotalMilliseconds
+} | Measure-Object -Average
 ```
 
-### Step 9 — Create Symbolic Links
+Run that line, switch profiles, then run it again.
 
-Symbolic links make your profile path point to the files in this repo. This means any changes you pull from the repo are immediately active, and `$PSScriptRoot` resolves to the repo directory (so theme paths like `$PSScriptRoot\oh-my-posh\sh.json` work correctly).
+---
 
-> **You must run this in an elevated (Administrator) PowerShell terminal.**
+## Updating, moving, or uninstalling
+
+### To pull the latest changes
 
 ```powershell
-# Set these to match your setup
-$repoPath = "C:\Github Repos\shell_customizations"   # <-- change this to your clone path
-$profileDir = Split-Path $PROFILE
-
-# Remove existing files (already backed up in Step 8)
-$psProfile = Join-Path $profileDir "Microsoft.PowerShell_profile.ps1"
-$vscProfile = Join-Path $profileDir "Microsoft.VSCode_profile.ps1"
-
-if (Test-Path $psProfile) { Remove-Item $psProfile -Force }
-if (Test-Path $vscProfile) { Remove-Item $vscProfile -Force }
-
-# Create symbolic links
-New-Item -ItemType SymbolicLink -Path $psProfile -Target (Join-Path $repoPath "Microsoft.PowerShell_profile.ps1")
-New-Item -ItemType SymbolicLink -Path $vscProfile -Target (Join-Path $repoPath "Microsoft.VSCode_profile.ps1")
+cd <wherever-you-cloned-the-repo>
+git pull
 ```
 
-Verify the links were created:
+If you used **symlink mode**, you're done — your terminals will pick up the new version next time they start.
+
+If you used **copy mode** (no Developer Mode / no admin), re-run the switcher to refresh the copies:
 
 ```powershell
-Get-Item $psProfile | Select-Object FullName, LinkTarget
-Get-Item $vscProfile | Select-Object FullName, LinkTarget
+.\Switch-Profile.ps1 Optimized
 ```
 
-You should see `LinkTarget` pointing to the repo files.
+### To move the repo to a different folder
 
-### Step 10 — Verify the Setup
+1. Move (or re-clone) the repo to the new location.
+2. From the new location, run `.\Switch-Profile.ps1 Optimized` again. This updates the saved repo path and refreshes the links/copies.
 
-1. **Close all terminals** (PowerShell console, VS Code, Windows Terminal)
-2. **Open a new PowerShell console** — you should see the Oh My Posh prompt with powerline glyphs
-3. **Open VS Code's integrated terminal** — you should see the simpler single-line prompt
+### To uninstall completely
 
-If you see broken characters (rectangles, question marks), your terminal font is not set to a Nerd Font — revisit [Step 5](#step-5--configure-your-terminal-font).
+The switcher backed up any pre-existing profiles for you with names like `Microsoft.PowerShell_profile.ps1.backup-<timestamp>`. To restore them:
 
----
-
-## Repository Structure
-
-```
-├── Microsoft.PowerShell_profile.ps1   # Profile for the standard PowerShell console
-├── Microsoft.VSCode_profile.ps1       # Profile for the VS Code integrated terminal
-├── fonts/
-│   ├── Caskaydia Cove Nerd Font Complete.ttf
-│   ├── Caskaydia Cove Nerd Font Complete Mono.ttf
-│   └── Caskaydia Cove Nerd Font Complete Mono Windows Compatible.ttf
-├── oh-my-posh/
-│   ├── davde-theme-json               # Multi-line powerline prompt theme (console)
-│   └── sh.json                        # Simpler single-line prompt theme (VS Code)
-├── LICENSE
-└── README.md
+```powershell
+$dir = Split-Path $PROFILE
+Remove-Item "$dir\Microsoft.PowerShell_profile.ps1", "$dir\Microsoft.VSCode_profile.ps1" -Force -ErrorAction SilentlyContinue
+# Then rename the most recent .backup-<timestamp> file back to the original name, if you want it.
 ```
 
----
+To remove the saved repo path:
 
-## How PowerShell Profiles Work
-
-### What Is a Profile?
-
-A PowerShell profile is a `.ps1` script that runs automatically every time a new PowerShell session starts. It's the equivalent of `.bashrc` or `.zshrc` in Unix shells. You use it to load modules, set aliases, configure keybindings, and customize your prompt.
-
-### How the Host Determines Which Profile Loads
-
-PowerShell supports multiple "hosts" — each host is an application that embeds the PowerShell engine. The two most common are:
-
-| Host Name | Application | Profile Filename |
-|---|---|---|
-| `ConsoleHost` | Windows Terminal, pwsh.exe, standard console | `Microsoft.PowerShell_profile.ps1` |
-| `Visual Studio Code Host` | VS Code integrated terminal | `Microsoft.VSCode_profile.ps1` |
-
-When PowerShell starts, it:
-1. Detects which host it's running inside
-2. Resolves the `$PROFILE` path based on the host name
-3. Looks for the profile file at that path
-4. Executes it line-by-line if found
-
-This is why this repo has **two separate profile files** — PowerShell automatically picks the right one based on where you open your terminal.
-
-### Why Symbolic Links?
-
-You could simply copy the profile files to your `$PROFILE` directory, but symbolic links offer two advantages:
-
-1. **Single source of truth** — Pulling updates from this repo via `git pull` immediately updates your active profiles. No need to re-copy files.
-2. **`$PSScriptRoot` resolution** — The VS Code profile references `$PSScriptRoot\oh-my-posh\sh.json`. When accessed through a symlink, `$PSScriptRoot` resolves to the **repo directory** (where the `oh-my-posh/` folder exists). If you copy the file instead, `$PSScriptRoot` would resolve to your `Documents\PowerShell\` directory, and the theme file wouldn't be found.
-
-### Execution Order Inside the Profile
-
-When the profile runs, the following happens in order:
-
+```powershell
+[Environment]::SetEnvironmentVariable('SHELL_CUSTOMIZATIONS_ROOT', $null, 'User')
 ```
-1. using namespace declarations
-   (System.Management.Automation, System.Management.Automation.Language)
-        │
-2. Module imports
-   (PSReadLine, Terminal-Icons)
-        │
-3. Oh My Posh initialization
-   (runs oh-my-posh.exe → generates prompt functions → Invoke-Expression)
-        │
-4. CLI argument completers registered
-   (winget, dotnet — callbacks stored, not executed yet)
-        │
-5. PSReadLine keybindings registered
-   (~15 key handlers — callbacks stored, not executed yet)
-        │
-6. PSReadLine options set
-   (prediction source, view style, edit mode)
-        │
-7. Command validation handler registered
-   (git cmt → git commit auto-correction)
-        │
-8. Build macro keybindings registered
-   (Ctrl+Shift+B, Ctrl+Shift+T)
-        │
-   ✓ Shell is ready — prompt displayed
-```
-
----
-
-## Profile Differences: Console vs. VS Code
-
-The VS Code profile is intentionally lighter for use in VS Code's smaller terminal panel, where much of the visual context (Git, Azure, file icons) is already provided by the editor itself.
-
-| Feature | Console Profile | VS Code Profile |
-|---|---|---|
-| **Oh My Posh theme** | `davde-theme-json` via OneDrive (multi-line, 4 rows) | `sh.json` from this repo (single-line) |
-| **Terminal-Icons** | Loaded | Commented out |
-| **PredictionViewStyle** | `ListView` (dropdown menu) | `InlineView` (subtle ghost text) |
-| **PSReadLine keybindings** | All | All (identical) |
-| **Tab completers** | winget + dotnet | winget + dotnet (identical) |
-
----
-
-## What the Profiles Configure
-
-### Modules Loaded
-
-| Module | Console | VS Code | Purpose |
-|---|---|---|---|
-| **PSReadLine** | Yes | Yes | Advanced command-line editing (auto-loaded on PS 7+, explicitly imported for PS 5.1 `ConsoleHost`) |
-| **Terminal-Icons** | Yes | No | Adds file/folder icons to `Get-ChildItem` output |
-
-### CLI Tab-Completion
-
-Native argument completers are registered for:
-
-| CLI | What It Enables |
-|---|---|
-| **winget** | Tab-completion for all `winget` commands, arguments, and package names |
-| **dotnet** | Tab-completion for `dotnet` CLI commands and options |
-
-These are lazy — the completer callbacks only run when you press `Tab` after typing the command name.
-
-### PSReadLine Configuration
-
-#### General Options
-
-| Option | Console | VS Code |
-|---|---|---|
-| `PredictionSource` | `History` | `History` |
-| `PredictionViewStyle` | `ListView` | `InlineView` |
-| `EditMode` | `Windows` | `Windows` |
-
-#### Keybindings Reference
-
-**History & Navigation:**
-
-| Key | Action |
-|---|---|
-| `Up Arrow` | Search backward through history matching current input |
-| `Down Arrow` | Search forward through history matching current input |
-| `F7` | Open interactive history browser in `Out-GridView` (supports filtering and multi-select) |
-| `Right Arrow` | Move cursor right, or accept the next suggested word when at end of line |
-
-**Smart Insert / Delete:**
-
-| Key | Action |
-|---|---|
-| `"` or `'` | Smart quote insertion — auto-pairs quotes, wraps selected text, skips closing quotes contextually |
-| `(`, `{`, `[` | Auto-insert matching closing brace; wraps selected text if a selection exists |
-| `)`, `]`, `}` | Skip over the closing character if it already exists, otherwise insert |
-| `Backspace` | Delete matching pairs (quotes, braces) together when cursor is between them |
-
-**Word Movement (Emacs-style):**
-
-| Key | Action |
-|---|---|
-| `Alt+b` | Move backward one shell word |
-| `Alt+f` | Move forward one shell word |
-| `Alt+B` | Select backward one shell word |
-| `Alt+F` | Select forward one shell word |
-| `Alt+d` | Delete the next shell word |
-| `Alt+Backspace` | Delete the previous shell word |
-
-**Text Manipulation:**
-
-| Key | Action |
-|---|---|
-| `Ctrl+V` | Paste clipboard contents as a PowerShell here-string (`@'...'@`) |
-| `Alt+(` | Wrap the current selection (or entire line) in parentheses |
-| `Alt+'` | Cycle the token under the cursor through: no quotes → single quotes → double quotes |
-| `Alt+%` | Expand all aliases on the current line to their full command names |
-| `Alt+a` | Cycle through and select command arguments on the current line (supports digit argument for position) |
-| `Alt+w` | Save the current line to history without executing it |
-
-**Directory Bookmarks:**
-
-| Key | Action |
-|---|---|
-| `Ctrl+J` then a key | Mark the current directory with that key |
-| `Ctrl+j` then a key | Jump to the directory previously marked with that key |
-| `Alt+j` | Show all currently marked directories |
-
-**Build Macros:**
-
-| Key | Action |
-|---|---|
-| `Ctrl+Shift+B` | Run `dotnet build` in the current directory |
-| `Ctrl+Shift+T` | Run `dotnet test` in the current directory |
-
-**Other:**
-
-| Key | Action |
-|---|---|
-| `F1` | Open the help window for the command under the cursor |
-| `Ctrl+D, Ctrl+C` | Capture the current screen (useful for sharing terminal sessions) |
-
-#### Command Auto-Correction
-
-A command validation handler automatically corrects common Git typos:
-
-| Typed | Corrected To |
-|---|---|
-| `git cmt` | `git commit` |
-
----
-
-## Oh My Posh Themes
-
-### `davde-theme-json` — Multi-Line Powerline Theme
-
-Used by the **console profile**. A feature-rich, multi-line prompt with four rows:
-
-**Row 1 (left-aligned):**
-- **Session** — Username, hostname, and SSH indicator (blue `#0077c2` background)
-- **Path** — Current folder name with folder icon
-- **Git** — Branch name, ahead/behind status, working/staging changes, stash count. Background changes color based on state:
-  - Yellow `#fffb38` — clean
-  - Orange `#FF9248` — uncommitted changes
-  - Red-orange `#ff4500` — diverged (ahead AND behind)
-  - Purple `#B388FF` — ahead or behind only
-- **Exit code** — Green checkmark on success, red error symbol with meaning on failure
-
-**Row 1 (right-aligned):**
-- **Shell name** — Shows the current shell (e.g., `pwsh`)
-- **Battery** — Percentage and icon with color-coded state (charging/discharging/full)
-
-**Row 2:**
-- **Azure context** — Current Azure subscription name and environment (displays "Global" for AzureCloud)
-
-**Row 3:**
-- **Input prompt** — A ` => ` indicator for command input
-
-### `sh.json` — Simple Single-Line Theme
-
-Used by the **VS Code profile**. A compact single-line powerline prompt with:
-- **Path** — Current folder (pink `#ff479c` background)
-- **Git** — Branch and status (yellow `#fffb38` background)
-- **.NET version** — Current SDK version (green `#6CA35E` background)
-- **Root indicator** — Warning when running as admin
-- **Exit code** — Color-coded background (teal on success, red on error)
-
----
-
-## Fonts
-
-The `fonts/` directory contains the **Caskaydia Cove Nerd Font** (patched Cascadia Code), which is required for rendering the powerline glyphs, icons, and special characters used by the Oh My Posh themes and Terminal-Icons module.
-
-| File | Variant | Recommended For |
-|---|---|---|
-| `Caskaydia Cove Nerd Font Complete.ttf` | Proportional | General use |
-| `Caskaydia Cove Nerd Font Complete Mono.ttf` | Monospaced | Terminal use |
-| `Caskaydia Cove Nerd Font Complete Mono Windows Compatible.ttf` | Monospaced (Windows metrics) | Windows Terminal / VS Code |
-
-> **Use the Mono variant for terminals.** Proportional fonts cause alignment issues with powerline segments.
 
 ---
 
 ## Troubleshooting
 
-### Broken characters (squares, question marks) in the prompt
+### My prompt looks like a row of boxes or question marks
 
-Your terminal font is not set to a Nerd Font. See [Step 5 — Configure Your Terminal Font](#step-5--configure-your-terminal-font).
+You haven't installed the Nerd Font, or your terminal isn't using it. Repeat steps 2 and 3 of the [Quick Start](#quick-start).
 
-### `oh-my-posh: The term 'oh-my-posh' is not recognized`
+### My prompt looks plain (no colors, no icons)
 
-Oh My Posh is not installed or not on your `PATH`. Install it with `winget install JanDeDobbeleer.OhMyPosh` and restart your terminal.
-
-### `The file ... cannot be loaded because running scripts is disabled`
-
-PowerShell's execution policy is blocking the profile. Run this in an elevated PowerShell:
+Most likely the profile didn't run, or it can't find its theme file. Check:
 
 ```powershell
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+# Is the profile file in place?
+Test-Path $PROFILE
+
+# Does PowerShell know where this repo is?
+[Environment]::GetEnvironmentVariable('SHELL_CUSTOMIZATIONS_ROOT','User')
+
+# Is oh-my-posh on PATH?
+Get-Command oh-my-posh
 ```
 
-### Oh My Posh theme not found (VS Code profile)
+If the env var is empty or `oh-my-posh` is missing, re-run the [Quick Start](#quick-start) steps that set them up.
 
-If you copied the profile file instead of creating a symlink, `$PSScriptRoot` points to your `Documents\PowerShell\` directory instead of the repo. Either:
-- Create a symlink (recommended — see [Step 9](#step-9--create-symbolic-links))
-- Or change the theme path in the VS Code profile to an absolute path:
-  ```powershell
-  oh-my-posh init pwsh --config "C:\Github Repos\shell_customizations\oh-my-posh\sh.json" | Invoke-Expression
-  ```
+### "Symlink creation failed (Administrator privilege required)"
 
-### Profile loads slowly
+This is a warning, not an error — the switcher fell back to copying the files, which still works. To stop seeing this warning, either run PowerShell as administrator once when running the switcher, or (recommended) [enable Developer Mode](#recommended-one-time-setup-enable-developer-mode).
 
-Oh My Posh initialization takes ~100-200ms. If startup feels slow:
-- Run `oh-my-posh debug` to see timing
-- Run `Measure-Command { & $PROFILE }` to measure total profile load time
-- Consider caching the Oh My Posh init output (see the wiki or Oh My Posh docs)
+### `Switch-Profile.ps1` says my profile is "Unknown"
 
-### `Terminal-Icons` not showing icons
+This happens in **copy mode** — the switcher can't tell which version is currently in place because the file isn't a symlink. The profile is still working; the status display just can't introspect it. Enable Developer Mode and re-run the switcher to get accurate status.
 
-Ensure you're using a Nerd Font in your terminal. Terminal-Icons requires Nerd Font glyphs for file/folder icons.
+### I edit a file in the repo but nothing changes
 
-### Symlink creation fails with "Access denied"
+You're in **copy mode**. Either enable Developer Mode (so future installs use symlinks) or just re-run `.\Switch-Profile.ps1 Optimized` after each edit.
 
-You must run the `New-Item -ItemType SymbolicLink` command from an **elevated (Administrator)** PowerShell session. Right-click Windows Terminal or pwsh and select "Run as Administrator".
+### `oh-my-posh: command not found`
 
-### How do I check if my profile is a symlink?
+Either oh-my-posh isn't installed, or you didn't restart your terminal after installing it. Run:
 
 ```powershell
-Get-Item $PROFILE | Select-Object FullName, LinkTarget, Attributes
+winget install --id JanDeDobbeleer.OhMyPosh -e
 ```
 
-If `LinkTarget` shows a path, it's a symlink. If it's empty, it's a regular file.
+…then **fully close and reopen** your terminal.
 
 ---
 
-## Uninstalling
+## For curious users — what the profiles actually do
 
-To restore your original profiles and remove the symlinks:
+Skip this section if you just want things to work.
 
-```powershell
-$profileDir = Split-Path $PROFILE
+### Modules loaded
 
-# Remove the symlinks
-Remove-Item (Join-Path $profileDir "Microsoft.PowerShell_profile.ps1") -Force
-Remove-Item (Join-Path $profileDir "Microsoft.VSCode_profile.ps1") -Force
+- **PSReadLine** — gives PowerShell its modern command-line editing (history search, syntax coloring, predictions). Built into PowerShell 7+.
+- **Terminal-Icons** — adds file-type icons to `Get-ChildItem` output.
+- **Oh My Posh** — renders the prompt itself based on a theme JSON.
 
-# Restore backups (if you created them in Step 8)
-$psBackup = Join-Path $profileDir "Microsoft.PowerShell_profile.ps1.bak"
-$vscBackup = Join-Path $profileDir "Microsoft.VSCode_profile.ps1.bak"
+### Tab completion is configured for
 
-if (Test-Path $psBackup) { Rename-Item $psBackup "Microsoft.PowerShell_profile.ps1" }
-if (Test-Path $vscBackup) { Rename-Item $vscBackup "Microsoft.VSCode_profile.ps1" }
-```
+- `winget` (Windows package manager)
+- `dotnet` (.NET CLI)
 
-To uninstall Oh My Posh:
+### Useful key bindings (PSReadLine)
 
-```powershell
-winget uninstall JanDeDobbeleer.OhMyPosh
-```
+| Key | What it does |
+|---|---|
+| `Up Arrow` / `Down Arrow` | Search history starting with what you've typed |
+| `Right Arrow` (at end of line) | Accept the next word of the predicted command |
+| `Alt+f` / `Alt+b` | Move forward / backward by one shell-aware word |
+| `Alt+Backspace` | Delete the previous shell word |
+| `(`, `[`, `"`, `'` | Auto-insert the matching closing character |
+| `Backspace` | Delete an empty matching pair in one keystroke |
 
-To uninstall the modules:
+### Theme files
 
-```powershell
-Uninstall-Module -Name Terminal-Icons
-Uninstall-Module -Name PSReadLine
-```
+Two themes ship in `oh-my-posh/`:
+
+- **`davde-theme-json`** — a fuller theme with session, path, Git, exit code, shell, battery, and Azure segments. Used by the standalone PowerShell host.
+- **`sh.json`** — a lighter theme with session, path, Git, exit code, and Azure. Used inside VS Code (where vertical space matters more).
+
+Editing themes? See `oh-my-posh-docs/00-overview.md` for a syntax reference, or the official site at [ohmyposh.dev/docs/configuration](https://ohmyposh.dev/docs/configuration/general).
+
+### Performance optimizations in the `op_*` profiles
+
+1. **Cached prompt init.** `oh-my-posh init` is run once and its output saved to `%LOCALAPPDATA%\oh-my-posh\init.<hash>.ps1`. The cache is invalidated automatically when the theme JSON or `oh-my-posh.exe` is updated.
+2. **Lazy icon loading.** `Terminal-Icons` is imported on the first `OnIdle` event after your prompt appears, instead of blocking startup.
+3. **PSReadLine auto-loaded.** No explicit `Import-Module PSReadLine` — pwsh loads it the first time `Set-PSReadLine*` is called.
+4. **Trimmed key handlers.** Only frequently-used bindings are kept; the dozens of sample handlers from the original profile are removed.
+
+Together these typically take cold start from ~700–1000 ms down to ~250–400 ms.
